@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-PYIA v2 - Pentest AI Helper
+PYIA v0.1 - Pentest AI Helper
 Interface modernisée, chat IA fonctionnel, auto-parse Nmap en temps réel.
 """
 
@@ -44,12 +44,12 @@ PAD_LG = 12
 
 
 class PentestAIApp(tk.Tk):
-    """Application principale PYIA v2."""
+    """Application principale PYIA v0.1."""
 
     def __init__(self):
         super().__init__()
 
-        self.title("⚡ PYIA v2 — Pentest AI Helper")
+        self.title("⚡ PYIA v0.1 — Pentest AI Helper")
         self.geometry("1500x900")
         self.minsize(1100, 700)
 
@@ -77,8 +77,18 @@ class PentestAIApp(tk.Tk):
         self.api_model = tk.StringVar(value="gpt-4.1")
         self.api_key = tk.StringVar(value="")
 
+        # Chat IA autonome (providers locaux/externes)
+        self.ai_provider = tk.StringVar(value="ollama")
+        self.ai_model = tk.StringVar(value="llama3.1")
+        self.ai_api_key = tk.StringVar(value="")
+
         # Chat IA : historique de messages pour le contexte
         self._chat_messages: list[dict] = []
+
+        # Chat IA autonome (providers locaux/externes)
+        self.ai_provider = tk.StringVar(value="ollama")
+        self.ai_model = tk.StringVar(value="llama3.1")
+        self.ai_api_key = tk.StringVar(value="")
 
         # Profils
         self.profile_vars: dict[str, tk.BooleanVar] = {}
@@ -93,44 +103,44 @@ class PentestAIApp(tk.Tk):
         # Thèmes modernes
         self.themes = {
             "Cyber Midnight": {
-                "bg": "#0d1117", "fg": "#c9d1d9", "accent": "#58a6ff",
-                "accent2": "#1f6feb", "surface": "#161b22", "surface2": "#21262d",
-                "border": "#30363d", "canvas_bg": "#0d1117",
-                "terminal_cmd": "#79c0ff", "terminal_ip": "#ffa657",
-                "terminal_uh": "#d2a8ff", "error": "#f85149", "success": "#3fb950",
-                "muted": "#8b949e", "input_bg": "#0d1117",
+                "bg": "#05070c", "fg": "#e3f2ff", "accent": "#00bfff",
+                "accent2": "#00a2ff", "surface": "#0b1220", "surface2": "#0f1828",
+                "border": "#1b2a3c", "canvas_bg": "#05070c",
+                "terminal_cmd": "#37c3ff", "terminal_ip": "#ff9f43",
+                "terminal_uh": "#d86bff", "error": "#ff4d4d", "success": "#2dd36f",
+                "muted": "#7e8ba3", "input_bg": "#0b1220",
             },
             "Hacker Neon": {
-                "bg": "#0a0e14", "fg": "#b3b1ad", "accent": "#39ff14",
-                "accent2": "#2ecc40", "surface": "#0f1318", "surface2": "#171c23",
-                "border": "#1f2937", "canvas_bg": "#070a0e",
-                "terminal_cmd": "#39ff14", "terminal_ip": "#ff6e40",
-                "terminal_uh": "#40c4ff", "error": "#ff5252", "success": "#39ff14",
-                "muted": "#5c6370", "input_bg": "#0d1117",
+                "bg": "#030805", "fg": "#c7ffd9", "accent": "#3bff2f",
+                "accent2": "#24ff6d", "surface": "#07110b", "surface2": "#0b1b12",
+                "border": "#12301f", "canvas_bg": "#020603",
+                "terminal_cmd": "#3bff2f", "terminal_ip": "#ff784f",
+                "terminal_uh": "#4dd4ff", "error": "#ff4f6a", "success": "#35ff89",
+                "muted": "#6fa080", "input_bg": "#0b1b12",
             },
             "Dracula Pro": {
-                "bg": "#22212c", "fg": "#f8f8f2", "accent": "#ff79c6",
-                "accent2": "#bd93f9", "surface": "#282a36", "surface2": "#2d2f3f",
-                "border": "#44475a", "canvas_bg": "#1e1f29",
-                "terminal_cmd": "#8be9fd", "terminal_ip": "#50fa7b",
-                "terminal_uh": "#bd93f9", "error": "#ff5555", "success": "#50fa7b",
-                "muted": "#6272a4", "input_bg": "#282a36",
+                "bg": "#1b1a26", "fg": "#f8f8f2", "accent": "#ff7ac6",
+                "accent2": "#c08bff", "surface": "#242635", "surface2": "#2d3040",
+                "border": "#565a74", "canvas_bg": "#161621",
+                "terminal_cmd": "#99e8ff", "terminal_ip": "#6bff9c",
+                "terminal_uh": "#d0a6ff", "error": "#ff6b6b", "success": "#5cf38a",
+                "muted": "#7a86b2", "input_bg": "#242635",
             },
             "Nord Aurora": {
-                "bg": "#2e3440", "fg": "#eceff4", "accent": "#88c0d0",
-                "accent2": "#5e81ac", "surface": "#3b4252", "surface2": "#434c5e",
-                "border": "#4c566a", "canvas_bg": "#2e3440",
-                "terminal_cmd": "#88c0d0", "terminal_ip": "#ebcb8b",
-                "terminal_uh": "#b48ead", "error": "#bf616a", "success": "#a3be8c",
-                "muted": "#616e88", "input_bg": "#3b4252",
+                "bg": "#1d2330", "fg": "#e8f1f8", "accent": "#8fd3ff",
+                "accent2": "#6ba6ff", "surface": "#253040", "surface2": "#2d3a4e",
+                "border": "#3f5068", "canvas_bg": "#1a202d",
+                "terminal_cmd": "#9fdcff", "terminal_ip": "#ffd76f",
+                "terminal_uh": "#d8a9ff", "error": "#e57373", "success": "#a8e890",
+                "muted": "#7b8aa6", "input_bg": "#253040",
             },
             "Solarized": {
-                "bg": "#002b36", "fg": "#eee8d5", "accent": "#b58900",
-                "accent2": "#268bd2", "surface": "#073642", "surface2": "#0a4050",
-                "border": "#586e75", "canvas_bg": "#002028",
-                "terminal_cmd": "#268bd2", "terminal_ip": "#cb4b16",
-                "terminal_uh": "#d33682", "error": "#dc322f", "success": "#859900",
-                "muted": "#657b83", "input_bg": "#073642",
+                "bg": "#01212b", "fg": "#f2ead3", "accent": "#ffb400",
+                "accent2": "#2aaaff", "surface": "#063746", "surface2": "#0b4558",
+                "border": "#3d5560", "canvas_bg": "#021820",
+                "terminal_cmd": "#33a8ff", "terminal_ip": "#ff7a3c",
+                "terminal_uh": "#e655b5", "error": "#e24b4b", "success": "#97c13d",
+                "muted": "#6f8c92", "input_bg": "#063746",
             },
         }
         self.theme_var = tk.StringVar(value="Cyber Midnight")
@@ -194,7 +204,7 @@ class PentestAIApp(tk.Tk):
         self.status_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         self.status_label = tk.Label(
-            self.status_frame, text="  PYIA v2 — Prêt",
+            self.status_frame, text="  PYIA v0.1 — Prêt",
             anchor="w", font=FONT_UI_SM
         )
         self.status_label.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=PAD)
@@ -277,51 +287,39 @@ class PentestAIApp(tk.Tk):
         )
 
     def _build_chat_panel(self, parent):
-        # Zone historique chat
-        self.chat_history = scrolledtext.ScrolledText(parent, wrap=tk.WORD, font=FONT_MONO_SM)
-        self.chat_history.pack(fill=tk.BOTH, expand=True, padx=PAD, pady=(PAD, PAD_SM))
-        self._set_text_readonly(self.chat_history)
+        # Zone historique chat IA (nouveau ScrolledText)
+        self.ai_chat_display = scrolledtext.ScrolledText(parent, wrap=tk.WORD, font=FONT_MONO_SM)
+        self.ai_chat_display.pack(fill=tk.BOTH, expand=True, padx=PAD, pady=(PAD, PAD_SM))
+        self.ai_chat_display.config(state="disabled")
+        self.ai_chat_display.tag_config("user", foreground="#5dade2")
+        self.ai_chat_display.tag_config("assistant", foreground="#58d68d")
+        self.all_text_widgets.append(self.ai_chat_display)
+        # Alias pour compatibilité avec les fonctions existantes
+        self.chat_history = self.ai_chat_display
         self._append_to_text(
-            self.chat_history,
+            self.ai_chat_display,
             "💬 Chat IA prêt. Pose ta question ci-dessous.\n\n"
         )
-        self.all_text_widgets.append(self.chat_history)
 
-        # ── Barre d'entrée chat ──
-        chat_input_frame = ttk.Frame(parent)
-        chat_input_frame.pack(fill=tk.X, padx=PAD, pady=(0, PAD))
+        # Frame de saisie en bas du chat
+        input_frame = ttk.Frame(parent)
+        input_frame.pack(fill="x", padx=PAD, pady=(0, PAD))
 
-        self.chat_entry = tk.Entry(chat_input_frame, font=FONT_MONO)
-        self.chat_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=4)
-        self.chat_entry.insert(0, "")
-        self.chat_entry.bind("<Return>", self._on_send_chat)
-        self.chat_entry.bind("<FocusIn>", self._on_chat_focus_in)
+        # Champ d'entrée (tk.Entry pour pouvoir styler bg/fg facilement)
+        self.ai_input = tk.Entry(input_frame, font=("Consolas", 11))
+        self.ai_input.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.ai_input.bind("<Return>", lambda e: self._send_ai_message())
+        # Compat : réutiliser les anciennes références de champ de chat
+        self.chat_entry = self.ai_input
+        self._chat_placeholder_active = False
+        self._ai_placeholder_active = True
+        self._set_ai_placeholder()
+        self.ai_input.bind("<FocusIn>", self._on_ai_focus_in)
 
-        # Placeholder
-        self._chat_placeholder_active = True
-        self._set_chat_placeholder()
+        self.ai_send_btn = ttk.Button(input_frame, text="📤 Envoyer", command=self._send_ai_message)
+        self.ai_send_btn.pack(side="right")
 
-        send_btn = ttk.Button(chat_input_frame, text="Envoyer ▶",
-                              command=self._on_send_chat)
-        send_btn.pack(side=tk.LEFT, padx=(PAD_SM, 0))
-
-        clear_btn = ttk.Button(chat_input_frame, text="🗑",
-                               command=self._on_clear_chat)
-        clear_btn.pack(side=tk.LEFT, padx=(PAD_SM, 0))
-
-    def _set_chat_placeholder(self):
-        """Affiche le placeholder grisé."""
-        self.chat_entry.delete(0, tk.END)
-        self.chat_entry.insert(0, "Pose ta question ici...")
-        self.chat_entry.config(fg="#666666")
-        self._chat_placeholder_active = True
-
-    def _on_chat_focus_in(self, event=None):
-        if self._chat_placeholder_active:
-            self.chat_entry.delete(0, tk.END)
-            theme = self._current_theme()
-            self.chat_entry.config(fg=theme["fg"])
-            self._chat_placeholder_active = False
+        # Obsolète : placeholder géré par _send_ai_message, plus de champ legacy
 
     def _build_terminal_panel(self, parent):
         # Shell selector
@@ -495,18 +493,6 @@ class PentestAIApp(tk.Tk):
             rb = ttk.Radiobutton(theme_row, text=tn, variable=self.theme_var,
                                  value=tn, command=self.apply_theme)
             rb.pack(side=tk.LEFT, padx=PAD_SM)
-
-        # Projet
-        project_frame = ttk.LabelFrame(inner, text="  📁  Projet  ")
-        project_frame.pack(fill=tk.X, padx=PAD_LG, pady=PAD_LG)
-
-        proj_row = ttk.Frame(project_frame)
-        proj_row.pack(fill=tk.X, padx=PAD, pady=PAD)
-
-        ttk.Button(proj_row, text="💾  Sauvegarder", command=self.save_project).pack(
-            side=tk.LEFT, padx=PAD_SM)
-        ttk.Button(proj_row, text="📂  Charger", command=self.load_project).pack(
-            side=tk.LEFT, padx=PAD_SM)
 
     def _test_api_connection(self):
         if not HAS_REQUESTS:
@@ -813,6 +799,123 @@ class PentestAIApp(tk.Tk):
 
         except Exception as e:
             self.output_queue.put(("CHAT", f"❌ Erreur : {e}"))
+
+    # ============================================================
+    #  CHAT IA AUTONOME (providers multiples)
+    # ============================================================
+    def _send_ai_message(self):
+        """Envoie le message utilisateur au chat IA autonome."""
+        msg = self.ai_input.get().strip()
+        if self._ai_placeholder_active:
+            return
+        if not msg:
+            return
+
+        # Affiche le message utilisateur
+        self.ai_chat_display.config(state="normal")
+        self.ai_chat_display.insert("end", f"\n🧑 Vous : {msg}\n", "user")
+        self.ai_chat_display.config(state="disabled")
+        self.ai_chat_display.see("end")
+
+        # Vide le champ
+        self.ai_input.delete(0, "end")
+        self._set_ai_placeholder()
+
+        # Appel IA dans un thread
+        threading.Thread(target=self._query_ai, args=(msg,), daemon=True).start()
+
+    def _query_ai(self, message: str):
+        """Interroge l'IA selon le provider configuré."""
+        try:
+            provider = self.ai_provider.get() if hasattr(self, "ai_provider") else "ollama"
+            response = ""
+
+            if provider == "ollama":
+                if not HAS_REQUESTS:
+                    raise ImportError("Le module requests est requis pour interroger Ollama.")
+                url = "http://localhost:11434/api/generate"
+                model = self.ai_model.get() if hasattr(self, "ai_model") else "llama3.1"
+                payload = {
+                    "model": model,
+                    "prompt": message,
+                    "stream": False
+                }
+                r = requests.post(url, json=payload, timeout=120)
+                if r.status_code == 200:
+                    response = r.json().get("response", "Pas de réponse")
+                else:
+                    response = f"Erreur Ollama: {r.status_code}"
+
+            elif provider == "openai":
+                if not HAS_REQUESTS:
+                    raise ImportError("Le module requests est requis pour interroger l'API OpenAI.")
+                api_key = self.ai_api_key.get() if hasattr(self, "ai_api_key") else ""
+                url = "https://api.openai.com/v1/chat/completions"
+                headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+                payload = {
+                    "model": "gpt-4",
+                    "messages": [
+                        {"role": "system", "content": "Tu es un assistant pentest expert en cybersécurité."},
+                        {"role": "user", "content": message}
+                    ]
+                }
+                r = requests.post(url, json=payload, headers=headers, timeout=120)
+                if r.status_code == 200:
+                    response = r.json()["choices"][0]["message"]["content"]
+                else:
+                    response = f"Erreur OpenAI: {r.status_code} - {r.text}"
+
+            elif provider == "anthropic":
+                if not HAS_REQUESTS:
+                    raise ImportError("Le module requests est requis pour interroger l'API Anthropic.")
+                api_key = self.ai_api_key.get() if hasattr(self, "ai_api_key") else ""
+                url = "https://api.anthropic.com/v1/messages"
+                headers = {
+                    "x-api-key": api_key,
+                    "content-type": "application/json",
+                    "anthropic-version": "2023-06-01"
+                }
+                payload = {
+                    "model": "claude-sonnet-4-20250514",
+                    "max_tokens": 4096,
+                    "messages": [{"role": "user", "content": message}]
+                }
+                r = requests.post(url, json=payload, headers=headers, timeout=120)
+                if r.status_code == 200:
+                    response = r.json()["content"][0]["text"]
+                else:
+                    response = f"Erreur Anthropic: {r.status_code} - {r.text}"
+            else:
+                response = "Provider IA non reconnu."
+
+        except requests.exceptions.ConnectionError:
+            response = "❌ Connexion impossible. Vérifiez que le service IA est démarré."
+        except Exception as e:
+            response = f"❌ Erreur: {str(e)}"
+
+        # Affiche la réponse dans le chat (thread-safe)
+        self.after(0, self._display_ai_response, response)
+
+    def _display_ai_response(self, response: str):
+        """Affiche la réponse IA dans le chat autonome."""
+        self.ai_chat_display.config(state="normal")
+        self.ai_chat_display.insert("end", f"\n🤖 IA : {response}\n", "assistant")
+        self.ai_chat_display.config(state="disabled")
+        self.ai_chat_display.see("end")
+
+    def _set_ai_placeholder(self):
+        """Affiche le placeholder dans le champ chat IA autonome."""
+        self.ai_input.delete(0, tk.END)
+        self.ai_input.insert(0, "Écris ton message pour l'IA…")
+        self.ai_input.config(fg="#6c7a89")
+        self._ai_placeholder_active = True
+
+    def _on_ai_focus_in(self, event=None):
+        if self._ai_placeholder_active:
+            theme = self._current_theme()
+            self.ai_input.delete(0, tk.END)
+            self.ai_input.config(fg=theme["fg"])
+            self._ai_placeholder_active = False
 
     # ============================================================
     #  APPEL API MAMMOUTH AI
