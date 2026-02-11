@@ -27,7 +27,7 @@
 sudo apt install python3-tk nmap
 
 # Clone + install
-git clone https://github.com/VOTRE_USERNAME/pyia.git
+git clone https://github.com/FlushBerry/Pyia.git
 cd pyia
 pip install matplotlib networkx requests
 
