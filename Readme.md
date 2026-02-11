@@ -29,10 +29,10 @@ sudo apt install python3-tk nmap
 # Clone + install
 git clone https://github.com/FlushBerry/Pyia.git
 cd pyia
-pip install matplotlib networkx requests
+pip install -r requirements.txt
 
 # Lancer
-sudo python3 gpt32.py
+sudo python3 pyia.py
 
 📖 Utilisation rapide
 
